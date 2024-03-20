@@ -21,7 +21,7 @@ public class mpConnectToHostCached implements BaseCommand {
         int port = Integer.parseInt(b[1]);
 
         Console.showMessage("Starting client on port " + port);
-        MPModPlugin.setPlugin(new MPClientPlugin(host, port));
+        MPModPlugin.setPlugin(MPClientPlugin.class, new Object[]{host, port});
         Console.showMessage("Client started successfully");
 
         return CommandResult.SUCCESS;

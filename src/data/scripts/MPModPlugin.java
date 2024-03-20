@@ -22,9 +22,14 @@ import data.scripts.plugins.MPPlugin;
 import data.scripts.plugins.ai.MPDefaultAutofireAIPlugin;
 import data.scripts.plugins.ai.MPDefaultMissileAIPlugin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
+
+import data.scripts.misc.CustomClassLoader;
 
 public class MPModPlugin extends BaseModPlugin {
 
@@ -89,12 +94,14 @@ public class MPModPlugin extends BaseModPlugin {
         return null;
     }
 
-    public static void setPlugin(MPPlugin plugin) {
+    public static void setPlugin(Class<?> pluginClass, Object[] args) {
         if (PLUGIN != null) {
             Global.getCombatEngine().removePlugin(PLUGIN);
         }
-        Global.getCombatEngine().addPlugin(plugin);
-        PLUGIN = plugin;
+
+        MPPlugin newPlugin = MPLoadScript(pluginClass, args);
+        Global.getCombatEngine().addPlugin(newPlugin);
+        PLUGIN = newPlugin;
     }
 
     public static void destroyPlugin() {
@@ -106,4 +113,84 @@ public class MPModPlugin extends BaseModPlugin {
         return PLUGIN;
     }
 
+    /**
+     * Custom class loader, for bypassing Starsector's class loader restrictions (java.io, reflection, etc)
+     * Credit to andylizi (Method from his Planet Search plugin, found here https://github.com/andylizi/starsector-planet-search)
+     * Alex's stance on bypassing class loader https://fractalsoftworks.com/forum/index.php?topic=23229.msg354196
+     */
+    private static final CustomClassLoader MPClassLoader;
+    static{
+        CustomClassLoader loader;
+        try{
+            ClassLoader cl = MPModPlugin.class.getClassLoader();
+            while (cl != null && !(cl instanceof URLClassLoader)) cl = cl.getParent();
+            if(cl == null) throw new RuntimeException("Unable to find URLClassLoader");
+            URL[] urls = ((URLClassLoader)cl).getURLs();
+
+            loader = new CustomClassLoader(urls, ClassLoader.getSystemClassLoader());
+        } catch (RuntimeException | Error ex){
+            throw ex;
+        } catch (Throwable t){
+            throw new ExceptionInInitializerError(t);
+        }
+        MPClassLoader = loader;
+    }
+
+    /**
+     * Map for converting between wrappers and primitive types, for use in MPLoadScript
+     */
+    private final static Map<Class<?>, Class<?>> wPMap = new HashMap<>();
+    static {
+        wPMap.put(Boolean.class, boolean.class);
+        wPMap.put(Byte.class, byte.class);
+        wPMap.put(Short.class, short.class);
+        wPMap.put(Character.class, char.class);
+        wPMap.put(Integer.class, int.class);
+        wPMap.put(Long.class, long.class);
+        wPMap.put(Float.class, float.class);
+        wPMap.put(Double.class, double.class);
+    }
+
+    /**
+     * Equivalent to creating a new instance of a class, but does it through MPClassLoader instead of Starsector's class loader
+     * @param c Class to construct
+     * @param args Constructor arguments, or null
+     * @return New instance of class
+     */
+    public static <T> T MPLoadScript(Class<?> c, Object[] args){
+        try{
+            Global.getLogger(MPModPlugin.class).info("AMONG US!!! ["+c.getName()+"]");
+            Class<?> cls = MPClassLoader.loadClass( c.getName());
+            Global.getLogger(MPModPlugin.class).info("loaded class");
+
+            ArrayList<Class<?>> argTypes = new ArrayList<>();
+            ArrayList<Object> argList = new ArrayList<>();
+            Global.getLogger(MPModPlugin.class).info("created empty list");
+            if(args != null){
+                for(int i = 0; i < args.length; i++){
+                    Global.getLogger(MPModPlugin.class).info("adding arg type to list index, from array pos"+ i);
+                    Class<?> argClass = args[i].getClass();
+                    if(wPMap.containsKey(argClass))
+                        argClass = wPMap.get(argClass);
+
+                    argTypes.add(argClass);
+                    argList.add(args[i]);
+                    Global.getLogger(MPModPlugin.class).info("added arg type");
+                }
+            } else{
+                argTypes = null;
+                argList = null;
+            }
+
+            Global.getLogger(MPModPlugin.class).info("getting method handle");
+            MethodHandle ctr = MethodHandles.lookup().findConstructor(cls, MethodType.methodType(void.class, argTypes));
+            Global.getLogger(MPModPlugin.class).info("found uhh the uhhehrm eeuuugghh method handle, invoking constructor");
+
+            return (T)ctr.invokeWithArguments(argList);
+        } catch(RuntimeException | Error ex){
+            throw ex;
+        } catch (Throwable t){
+            throw new AssertionError("unreachable", t);
+        }
+    }
 }

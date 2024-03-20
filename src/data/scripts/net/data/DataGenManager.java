@@ -1,5 +1,6 @@
 package data.scripts.net.data;
 
+import com.fs.starfarer.api.Global;
 import data.scripts.net.data.packables.EntityData;
 import data.scripts.net.data.records.DataRecord;
 import data.scripts.net.data.tables.InboundEntityManager;
@@ -35,6 +36,7 @@ public class DataGenManager {
 
     public static byte registerRecordType(String c, DataRecord<?> instance) {
         byte id = idIncrementer;
+        Global.getLogger(DataGenManager.class).info("Putting recordType with string ["+ c +"]");
         recordTypeIDs.put(c, id);
         recordInstances.put(id, instance);
         idIncrementer++;
@@ -134,6 +136,7 @@ public class DataGenManager {
      * @return new empty instance
      */
     public static DataRecord<?> recordFactory(byte typeID) {
+        Global.getLogger(DataGenManager.class).info("Getting DataRecord for typeID " + typeID);
         DataRecord<?> out = recordInstances.get(typeID);
         if (out == null) {
             throw new NullPointerException("No record type found at ID: " + typeID);

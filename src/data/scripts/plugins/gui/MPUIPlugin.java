@@ -826,7 +826,7 @@ public class MPUIPlugin extends BaseEveryFrameCombatPlugin {
         });
         infoText.setColor(Color.GREEN);
 
-        MPModPlugin.setPlugin(new MPServerPlugin(p));
+        MPModPlugin.setPlugin(MPServerPlugin.class, new Object[]{p});
     }
 
     private void initClient(String hostname, int port, Text infoText) {
@@ -852,7 +852,7 @@ public class MPUIPlugin extends BaseEveryFrameCombatPlugin {
 
             saveAddress(hostname, 8080);
 
-            MPModPlugin.setPlugin(new MPClientPlugin("localhost", 0));
+            MPModPlugin.setPlugin(MPClientPlugin.class, new Object[]{"localhost", 0});
         } else {
             String[] ids = hostname.split("\\.");
             if (ids.length != 4) {
@@ -875,7 +875,7 @@ public class MPUIPlugin extends BaseEveryFrameCombatPlugin {
                 }
             });
             infoText.setColor(Color.GREEN);
-            MPModPlugin.setPlugin(new MPClientPlugin(hostname, port));
+            MPModPlugin.setPlugin(MPClientPlugin.class, new Object[]{hostname, port});
         }
     }
 
