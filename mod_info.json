@@ -7,6 +7,9 @@
 	"gameVersion":"0.97a-RC8",
 	"jars":[
 		"jars/Multiplayer.jar",
+		"jars/asm/asm-9.6.jar",
+		"jars/asm/asm-commons-9.6.jar",
+		"jars/asm/asm-util-9.6.jar",
 		"jars/netty/netty-all-4.1.69.Final.jar",
 		"jars/netty/netty-buffer-4.1.69.Final.jar",
 		"jars/netty/netty-codec-4.1.69.Final.jar",

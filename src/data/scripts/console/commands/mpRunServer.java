@@ -15,7 +15,7 @@ public class mpRunServer implements BaseCommand {
         }
 
         Console.showMessage("Starting server");
-        MPModPlugin.setPlugin(MPServerPlugin.class, new Object[]{20303});
+        MPModPlugin.setPlugin(new MPServerPlugin(20303));
 
         return CommandResult.SUCCESS;
     }

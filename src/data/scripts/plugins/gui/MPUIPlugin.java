@@ -9,8 +9,15 @@ import com.fs.starfarer.api.combat.CombatEngineAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import data.scripts.MPModPlugin;
-import data.scripts.net.data.packables.entities.ships.ShipData;
-import data.scripts.net.data.packables.entities.ships.ClientPlayerData;
+import data.scripts.net.data.DataGenManager;
+import data.scripts.net.data.packables.entities.projectiles.BallisticProjectileData;
+import data.scripts.net.data.packables.entities.projectiles.MissileData;
+import data.scripts.net.data.packables.entities.projectiles.MovingRayData;
+import data.scripts.net.data.packables.entities.ships.*;
+import data.scripts.net.data.packables.metadata.*;
+import data.scripts.net.data.records.*;
+import data.scripts.net.data.records.collections.ListenArrayRecord;
+import data.scripts.net.data.records.collections.SyncingListRecord;
 import data.scripts.net.data.tables.client.combat.entities.ships.ClientShipTable;
 import data.scripts.net.data.tables.client.combat.player.PlayerShip;
 import data.scripts.net.data.tables.server.combat.entities.ships.ShipTable;
@@ -826,7 +833,7 @@ public class MPUIPlugin extends BaseEveryFrameCombatPlugin {
         });
         infoText.setColor(Color.GREEN);
 
-        MPModPlugin.setPlugin(MPServerPlugin.class, new Object[]{p});
+        MPModPlugin.setPlugin(new MPServerPlugin(p));
     }
 
     private void initClient(String hostname, int port, Text infoText) {
@@ -852,7 +859,7 @@ public class MPUIPlugin extends BaseEveryFrameCombatPlugin {
 
             saveAddress(hostname, 8080);
 
-            MPModPlugin.setPlugin(MPClientPlugin.class, new Object[]{"localhost", 0});
+            MPModPlugin.setPlugin(new MPClientPlugin("localhost", 0));
         } else {
             String[] ids = hostname.split("\\.");
             if (ids.length != 4) {
@@ -875,7 +882,7 @@ public class MPUIPlugin extends BaseEveryFrameCombatPlugin {
                 }
             });
             infoText.setColor(Color.GREEN);
-            MPModPlugin.setPlugin(MPClientPlugin.class, new Object[]{hostname, port});
+            MPModPlugin.setPlugin(new MPClientPlugin(hostname, port));
         }
     }
 

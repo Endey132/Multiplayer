@@ -1,6 +1,7 @@
 package data.scripts.net.io.udp.server;
 
 import cmu.CMUtils;
+import cmu.plugins.GUIDebug;
 import cmu.plugins.debug.DebugGraphContainer;
 import com.fs.starfarer.api.Global;
 import data.scripts.net.io.Clock;
@@ -87,6 +88,7 @@ public class DatagramServer implements Runnable {
                 if (clock.mark()) {
                     dataGraph2.increment(num);
                     dataGraph.increment(size);
+
                     CMUtils.getGuiDebug().putContainer(DatagramServer.class, "dataGraph", dataGraph);
                     CMUtils.getGuiDebug().putContainer(DatagramServer.class, "dataGraph2", dataGraph2);
 //                    dataGraphCompressed.increment(sizeCompressed);
